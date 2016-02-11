@@ -28,12 +28,15 @@ ReadAllFile = Split(ReadAllFile, VBCRLF)
 
 Set fAssemblyInfo = fso.OpenTextFile(WScript.Arguments.Item(0), 2)
 For Each sLine in ReadAllFile
-  If InStr(sLine, "AssemblyFileVersion") <> 0 Then
-    index = InStr(sLine, "(")
-    index = InStr(index, sLine, ".")
-    index = InStr(index+1, sLine, ".")
-    index2 = InStr(index+1, sLine, ".")
-    sLine = Left(sLine, index) + nBuildNumber + Mid(sLine, index2 )
+  If Left(sLine, 2) <> "//" Then
+    If (InStr(sLine, "AssemblyFileVersion") <> 0) OR (InStr(sLine, "AssemblyVersion") <> 0) Then
+      index = InStr(sLine, "(")
+      index = InStr(index, sLine, ".")
+      index = InStr(index+1, sLine, ".")
+      index2 = InStr(index+1, sLine, ".")
+	  If index2 < 1 Then index2 = InStr(index+1, sLine, """")
+      sLine = Left(sLine, index) + nBuildNumber + Mid(sLine, index2 )
+    End If
   End If
   fAssemblyInfo.Write sLine & VbCRLF
 Next
