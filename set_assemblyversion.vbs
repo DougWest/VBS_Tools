@@ -1,6 +1,6 @@
 'Option Explicit
 
-Dim wshShell, nBuildNumber, fso, fAssemblyInfo, ReadAllFile, sLine, index, index2
+Dim wshShell, nBuildNumber, nRevision, fso, fAssemblyInfo, ReadAllFile, sLine, index, index2, index3
 
 If WScript.Arguments.Count < 1 Then
   WScript.Quit 10
@@ -12,7 +12,8 @@ ElseIf IsNumeric(WScript.Arguments.Item(1)) Then
 Else
   WScript.Quit 11
 End If
-
+nRevision = "0"
+If WScript.Arguments.Count = 3 AND WScript.Arguments.Item(2) = "SNAPSHOT" Then nRevision = "9999"
 Set fso = CreateObject("Scripting.FileSystemObject")
 
 If Not fso.FileExists(WScript.Arguments.Item(0)) Then WScript.Quit 12
@@ -34,8 +35,17 @@ For Each sLine in ReadAllFile
       index = InStr(index, sLine, ".")
       index = InStr(index+1, sLine, ".")
       index2 = InStr(index+1, sLine, ".")
-	  If index2 < 1 Then index2 = InStr(index+1, sLine, """")
-      sLine = Left(sLine, index) + nBuildNumber + Mid(sLine, index2 )
+	  If index2 < 1 Then 
+	    index2 = InStr(index+1, sLine, """")
+		index3 = index2
+	  Else
+	    index3 = InStr(index2+1, sLine, """")
+	  End If
+	  If 0 = nRevision Then
+        sLine = Left(sLine, index) + nBuildNumber + Mid(sLine, index2 )
+	  Else
+	    sLine = Left(sLine, index) + nBuildNumber + "." + nRevision + Mid(sLine, index3 )
+	  End If
     End If
   End If
   fAssemblyInfo.Write sLine & VbCRLF
