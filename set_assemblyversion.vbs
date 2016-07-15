@@ -1,3 +1,4 @@
+'Source
 'Option Explicit
 
 Dim wshShell, nBuildNumber, nRevision, fso, fAssemblyInfo, ReadAllFile, sLine, index, index2, index3
@@ -13,7 +14,7 @@ Else
   WScript.Quit 11
 End If
 nRevision = "0"
-If WScript.Arguments.Count = 3 AND WScript.Arguments.Item(2) = "SNAPSHOT" Then nRevision = "9999"
+If (3 = WScript.Arguments.Count) Then If "SNAPSHOT" = WScript.Arguments.Item(2) Then nRevision = "9999"
 Set fso = CreateObject("Scripting.FileSystemObject")
 
 If Not fso.FileExists(WScript.Arguments.Item(0)) Then WScript.Quit 12
@@ -29,7 +30,11 @@ ReadAllFile = Split(ReadAllFile, VBCRLF)
 
 Set fAssemblyInfo = fso.OpenTextFile(WScript.Arguments.Item(0), 2)
 For Each sLine in ReadAllFile
-  If Left(sLine, 2) <> "//" Then
+  If (InStr(WScript.Arguments.Item(0), ".vbp") <> 0) Then 'This logic if the file is a VB6 project file.
+    If (InStr(sLine, "RevisionVer") <> 0) Then
+	  sLine = "RevisionVer=" + nBuildNumber
+	End If
+  ElseIf Left(sLine, 2) <> "//" Then 'This logic if the file is a C# AssemblyInfo.cs file.
     If (InStr(sLine, "AssemblyFileVersion") <> 0) OR (InStr(sLine, "AssemblyVersion") <> 0) Then
       index = InStr(sLine, "(")
       index = InStr(index, sLine, ".")
